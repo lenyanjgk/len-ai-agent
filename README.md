@@ -186,9 +186,9 @@ String answer = model.chat("你好，我想了解一下AI Agent");
 
 ## 联系方式
 
-- 项目维护者: [Your Name](mailto:your.email@example.com)
-- 项目讨论群: [Group Link]
+- 项目维护者: [lenyan](https://blog.csdn.net/jgk666666)
+- 项目讨论群: [xxx xxx]
 
 ---
 
-*本项目是"AI超级智能体"系列的实现，旨在帮助开发者快速掌握AI开发技术，构建智能应用。* 
+*本项目是"lenAI超级智能体"系列的实现，旨在帮助开发者快速掌握AI开发技术，构建智能应用。* 
