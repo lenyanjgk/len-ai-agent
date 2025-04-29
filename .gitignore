@@ -1,6 +1,7 @@
 ### CUSTOM ###
 application-local.yml
 /src/main/java/com/lenyan/lenaiagent/demo/invoke/TestApiKey.java
+/tmp/*
 
 HELP.md
 target/
