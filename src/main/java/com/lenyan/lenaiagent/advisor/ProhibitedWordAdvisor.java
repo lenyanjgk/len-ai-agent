@@ -65,6 +65,13 @@ public class ProhibitedWordAdvisor implements CallAroundAdvisor, StreamAroundAdv
     }
 
     /**
+     * 创建一个默认的违禁词Advisor,是否使用正则表达式
+     */
+    public ProhibitedWordAdvisor(boolean useRegex) {
+        this(loadProhibitedWordsFromFile(DEFAULT_PROHIBITED_WORDS_FILE), true, false, useRegex);
+    }
+
+    /**
      * 创建一个默认的违禁词Advisor，从指定文件读取违禁词列表
      * 
      * @param prohibitedWordsFile 违禁词文件路径（相对于classpath）

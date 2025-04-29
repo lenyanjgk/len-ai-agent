@@ -28,7 +28,7 @@ public class MyLoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
 	}
 
 	private void observeAfter(AdvisedResponse advisedResponse) {
-		log.info("AI Response: {}", advisedResponse.response().getResult().getOutput().getText());
+		//log.info("AI Response: {}", advisedResponse.response().getResult().getOutput().getText());
 	}
 
 	@Override
