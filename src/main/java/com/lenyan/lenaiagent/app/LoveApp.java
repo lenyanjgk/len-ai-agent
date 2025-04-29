@@ -3,15 +3,14 @@ package com.lenyan.lenaiagent.app;
 import com.lenyan.lenaiagent.advisor.MyLoggerAdvisor;
 import com.lenyan.lenaiagent.advisor.ProhibitedWordAdvisor;
 import com.lenyan.lenaiagent.chatmemory.MySQLChatMemory;
+import com.lenyan.lenaiagent.chatmemory.MybatisPlusChatMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
 import java.util.List;
 
 import static org.springframework.ai.chat.client.advisor.AbstractChatMemoryAdvisor.CHAT_MEMORY_CONVERSATION_ID_KEY;
@@ -24,23 +23,22 @@ public class LoveApp {
     private static final String SYSTEM_PROMPT = "**恋爱大师·情感导航员**  \n" + "10年情感咨询经验，擅长亲密关系理论与沟通技巧。提供中立建议，保护隐私。通过情绪确认、需求拆解（3-5维度）、心理学理论（如非暴力沟通）解析问题，给出2种实操策略（如\"我句式\"对话模拟），引导关系边界建立。示例：\"遗忘纪念日可能涉及记忆模式/爱意表达方式差异，建议用'观察+感受'沟通\"。不评判道德、不做医疗建议，严守伦理规范。您的专属情感顾问，随时为您解惑。";
     private final ChatClient chatClient;
 
-    public LoveApp(ChatModel dashscopeChatModel, DataSource dataSource) {
+
+    public LoveApp(ChatModel dashscopeChatModel, MybatisPlusChatMemory chatMemory) {
         // String fileDir = System.getProperty("user.dir") + "/tmp/chat-memory";
         // ChatMemory chatMemory = new FileBasedChatMemory(fileDir);
 
-        // 初始化基于MySQL的对话记忆
-        ChatMemory chatMemory = new MySQLChatMemory(dataSource);
         // ChatMemory chatMemory = new InMemoryChatMemory();
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory),
-                // 记录日志
-                new MyLoggerAdvisor(),
-                // 违禁词检测 - 从classpath下的prohibited-words.txt文件读取违禁词
-                new ProhibitedWordAdvisor()
-                // 复读强化阅读能力
-                // new ReReadingAdvisor()
-        ).build();
+                        // 记录日志
+                        new MyLoggerAdvisor(),
+                        // 违禁词检测 - 从文件读取违禁词
+                        new ProhibitedWordAdvisor()
+                        // 复读强化阅读能力
+                        // new ReReadingAdvisor()
+                ).build();
     }
 
     public String doChat(String message, String chatId) {

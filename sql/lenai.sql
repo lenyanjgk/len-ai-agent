@@ -5,7 +5,7 @@ CREATE DATABASE IF NOT EXISTS lenai CHARACTER SET utf8mb4 COLLATE utf8mb4_unicod
 USE lenai;
 
 -- 创建对话记忆表
-CREATE TABLE IF NOT EXISTS chat_memory (
+CREATE TABLE IF NOT EXISTS chatmemory (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     conversation_id VARCHAR(255) NOT NULL,
     message_order INT NOT NULL,

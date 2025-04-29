@@ -2,6 +2,7 @@ package com.lenyan.lenaiagent.chatmemory;
 
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONUtil;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -9,6 +10,7 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -21,6 +23,7 @@ import java.util.*;
  * MySQL实现的对话记忆
  * 将对话内容持久化到MySQL数据库
  */
+@Component
 @Slf4j
 public class MySQLChatMemory implements ChatMemory {
 
@@ -51,14 +54,14 @@ public class MySQLChatMemory implements ChatMemory {
 
         try {
             // 获取当前最大序号
-            String maxOrderSql = "SELECT MAX(message_order) FROM chat_memory WHERE conversation_id = ? AND is_delete = 0";
+            String maxOrderSql = "SELECT MAX(message_order) FROM chatmemory WHERE conversation_id = ? AND is_delete = 0";
             logSql(maxOrderSql, new Object[] { conversationId });
 
             Integer maxOrder = getMaxOrder(conversationId).orElse(0);
             int nextOrder = maxOrder + 1;
 
             // 使用批处理提高效率
-            String insertSql = "INSERT INTO chat_memory (conversation_id, message_order, message_type, content, message_json, create_time, update_time, is_delete) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertSql = "INSERT INTO chatmemory (conversation_id, message_order, message_type, content, message_json, create_time, update_time, is_delete) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             log.info("SQL执行批处理: {}", insertSql);
             log.info("批处理参数示例 - conversationId: {}, 消息数量: {}", conversationId, messages.size());
 
@@ -105,12 +108,12 @@ public class MySQLChatMemory implements ChatMemory {
             // 修改查询逻辑：lastN > 0 时获取前N条消息，而不是最后N条
             if (lastN > 0) {
                 // 直接获取前lastN条消息，按message_order升序排序
-                sql = "SELECT message_json, message_type, content FROM chat_memory " +
+                sql = "SELECT message_json, message_type, content FROM chatmemory " +
                         "WHERE conversation_id = ? AND is_delete = 0 ORDER BY message_order DESC LIMIT ?";
                 params = new Object[] { conversationId, lastN };
             } else {
                 // 获取全部消息
-                sql = "SELECT message_json, message_type, content FROM chat_memory " +
+                sql = "SELECT message_json, message_type, content FROM chatmemory " +
                         "WHERE conversation_id = ? AND is_delete = 0 ORDER BY message_order DESC";
                 params = new Object[] { conversationId };
             }
@@ -129,7 +132,7 @@ public class MySQLChatMemory implements ChatMemory {
     public void clear(String conversationId) {
         try {
             // 将物理删除改为逻辑删除
-            String sql = "UPDATE chat_memory SET is_delete = 1, update_time = ? WHERE conversation_id = ? AND is_delete = 0";
+            String sql = "UPDATE chatmemory SET is_delete = 1, update_time = ? WHERE conversation_id = ? AND is_delete = 0";
             Timestamp now = Timestamp.valueOf(LocalDateTime.now());
             Object[] params = new Object[] { now, conversationId };
             logSql(sql, params);
@@ -146,7 +149,7 @@ public class MySQLChatMemory implements ChatMemory {
      */
     private Optional<Integer> getMaxOrder(String conversationId) {
         try {
-            String sql = "SELECT MAX(message_order) FROM chat_memory WHERE conversation_id = ? AND is_delete = 0";
+            String sql = "SELECT MAX(message_order) FROM chatmemory WHERE conversation_id = ? AND is_delete = 0";
             return Optional.ofNullable(jdbcTemplate.queryForObject(sql, Integer.class, conversationId));
         } catch (Exception e) {
             log.debug("会话 {} 中未找到现有消息", conversationId);
@@ -212,7 +215,7 @@ public class MySQLChatMemory implements ChatMemory {
      */
     public int getMessageCount(String conversationId) {
         try {
-            String sql = "SELECT COUNT(*) FROM chat_memory WHERE conversation_id = ? AND is_delete = 0";
+            String sql = "SELECT COUNT(*) FROM chatmemory WHERE conversation_id = ? AND is_delete = 0";
             logSql(sql, new Object[] { conversationId });
 
             Integer count = jdbcTemplate.queryForObject(sql, Integer.class, conversationId);
@@ -230,7 +233,7 @@ public class MySQLChatMemory implements ChatMemory {
         int offset = page * pageSize;
 
         try {
-            String sql = "SELECT message_json, message_type, content FROM chat_memory " +
+            String sql = "SELECT message_json, message_type, content FROM chatmemory " +
                     "WHERE conversation_id = ? AND is_delete = 0 ORDER BY message_order DESC LIMIT ? OFFSET ?";
             Object[] params = new Object[] { conversationId, pageSize, offset };
 
@@ -263,18 +266,18 @@ public class MySQLChatMemory implements ChatMemory {
                     // 如果总数大于lastN，获取最后lastN条
                     // 计算起始位置：总数 - lastN
                     int offset = totalMessages - lastN;
-                    sql = "SELECT message_json, message_type, content FROM chat_memory " +
+                    sql = "SELECT message_json, message_type, content FROM chatmemory " +
                             "WHERE conversation_id = ? AND is_delete = 0 ORDER BY message_order DESC LIMIT ? OFFSET ?";
                     params = new Object[] { conversationId, lastN, offset };
                 } else {
                     // 如果总数不大于lastN，获取全部消息
-                    sql = "SELECT message_json, message_type, content FROM chat_memory " +
+                    sql = "SELECT message_json, message_type, content FROM chatmemory " +
                             "WHERE conversation_id = ? AND is_delete = 0 ORDER BY message_order DESC";
                     params = new Object[] { conversationId };
                 }
             } else {
                 // 获取全部消息
-                sql = "SELECT message_json, message_type, content FROM chat_memory " +
+                sql = "SELECT message_json, message_type, content FROM chatmemory " +
                         "WHERE conversation_id = ? AND is_delete = 0 ORDER BY message_order DESC";
                 params = new Object[] { conversationId };
             }
