@@ -3,6 +3,7 @@ package com.lenyan.lenaiagent.chatmemory;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
+import lombok.extern.slf4j.Slf4j;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.messages.Message;
@@ -10,43 +11,39 @@ import org.springframework.ai.chat.messages.Message;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 基于文件持久化的对话记忆
  */
+@Slf4j
 public class FileBasedChatMemory implements ChatMemory {
 
-    private final String BASE_DIR;
-    private static final Kryo kryo = new Kryo();
+    private final String baseDir;
+    private static final Kryo kryo;
 
     static {
+        kryo = new Kryo();
         kryo.setRegistrationRequired(false);
-        // 设置实例化策略
         kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
     }
 
-    // 构造对象时，指定文件保存目录
     public FileBasedChatMemory(String dir) {
-        this.BASE_DIR = dir;
-        File baseDir = new File(dir);
-        if (!baseDir.exists()) {
-            baseDir.mkdirs();
-        }
+        this.baseDir = dir;
+        new File(dir).mkdirs();
     }
 
     @Override
     public void add(String conversationId, List<Message> messages) {
-        List<Message> conversationMessages = getOrCreateConversation(conversationId);
-        conversationMessages.addAll(messages);
-        saveConversation(conversationId, conversationMessages);
+        var existingMessages = getOrCreateConversation(conversationId);
+        existingMessages.addAll(messages);
+        saveConversation(conversationId, existingMessages);
     }
 
     @Override
     public List<Message> get(String conversationId, int lastN) {
-        List<Message> allMessages = getOrCreateConversation(conversationId);
+        var allMessages = getOrCreateConversation(conversationId);
         return allMessages.stream()
                 .skip(Math.max(0, allMessages.size() - lastN))
                 .toList();
@@ -54,35 +51,36 @@ public class FileBasedChatMemory implements ChatMemory {
 
     @Override
     public void clear(String conversationId) {
-        File file = getConversationFile(conversationId);
+        var file = getConversationFile(conversationId);
         if (file.exists()) {
             file.delete();
         }
     }
 
     private List<Message> getOrCreateConversation(String conversationId) {
-        File file = getConversationFile(conversationId);
-        List<Message> messages = new ArrayList<>();
-        if (file.exists()) {
-            try (Input input = new Input(new FileInputStream(file))) {
-                messages = kryo.readObject(input, ArrayList.class);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        var file = getConversationFile(conversationId);
+        if (!file.exists()) {
+            return new ArrayList<>();
         }
-        return messages;
+
+        try (var input = new Input(new FileInputStream(file))) {
+            return kryo.readObject(input, ArrayList.class);
+        } catch (Exception e) {
+            log.error("读取对话记录失败: {}", conversationId, e);
+            return new ArrayList<>();
+        }
     }
 
     private void saveConversation(String conversationId, List<Message> messages) {
-        File file = getConversationFile(conversationId);
-        try (Output output = new Output(new FileOutputStream(file))) {
+        var file = getConversationFile(conversationId);
+        try (var output = new Output(new FileOutputStream(file))) {
             kryo.writeObject(output, messages);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("保存对话记录失败: {}", conversationId, e);
         }
     }
 
     private File getConversationFile(String conversationId) {
-        return new File(BASE_DIR, conversationId + ".kryo");
+        return new File(baseDir, conversationId + ".kryo");
     }
 }

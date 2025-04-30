@@ -6,51 +6,46 @@ import org.springframework.ai.chat.model.MessageAggregator;
 import reactor.core.publisher.Flux;
 
 /**
- * 自定义日志 Advisor
- * 打印 info 级别日志、只输出单次用户提示词和 AI 回复的文本
+ * 自定义日志 Advisor，打印用户输入和 AI 输出
  */
 @Slf4j
 public class MyLoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
 
-	@Override
-	public String getName() {
-		return this.getClass().getSimpleName();
-	}
+    @Override
+    public String getName() {
+        return getClass().getSimpleName();
+    }
 
-	@Override
-	public int getOrder() {
-		return 0;
-	}
+    @Override
+    public int getOrder() {
+        return 0; // 执行顺序
+    }
 
-	private AdvisedRequest before(AdvisedRequest request) {
-		log.info("AI Request: {}", request.userText());
-		return request;
-	}
+    // 请求前打印用户输入
+    private AdvisedRequest before(AdvisedRequest request) {
+        log.info("AI Request: {}", request.userText());
+        return request;
+    }
 
-	private void observeAfter(AdvisedResponse advisedResponse) {
-		//log.info("AI Response: {}", advisedResponse.response().getResult().getOutput().getText());
-	}
+    // 响应后打印 AI 输出
+    private void observeAfter(AdvisedResponse response) {
+        log.info("AI Response: {}", response.response().getResult().getOutput().getText());
+    }
 
-	@Override
-	public AdvisedResponse aroundCall(AdvisedRequest advisedRequest, CallAroundAdvisorChain chain) {
+    // 同步调用处理
+    @Override
+    public AdvisedResponse aroundCall(AdvisedRequest req, CallAroundAdvisorChain chain) {
+        req = before(req);
+        AdvisedResponse res = chain.nextAroundCall(req);
+        observeAfter(res);
+        return res;
+    }
 
-		advisedRequest = before(advisedRequest);
-
-		AdvisedResponse advisedResponse = chain.nextAroundCall(advisedRequest);
-
-		observeAfter(advisedResponse);
-
-		return advisedResponse;
-	}
-
-	@Override
-	public Flux<AdvisedResponse> aroundStream(AdvisedRequest advisedRequest, StreamAroundAdvisorChain chain) {
-
-		advisedRequest = before(advisedRequest);
-
-		Flux<AdvisedResponse> advisedResponses = chain.nextAroundStream(advisedRequest);
-
-		return new MessageAggregator().aggregateAdvisedResponse(advisedResponses, this::observeAfter);
-	}
-
+    // 流式调用处理
+    @Override
+    public Flux<AdvisedResponse> aroundStream(AdvisedRequest req, StreamAroundAdvisorChain chain) {
+        req = before(req);
+        Flux<AdvisedResponse> res = chain.nextAroundStream(req);
+        return new MessageAggregator().aggregateAdvisedResponse(res, this::observeAfter);
+    }
 }
