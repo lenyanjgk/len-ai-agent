@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -130,8 +132,9 @@ public class QwenController {
         // 确保类型为AUDIO
         request.setType("AUDIO");
         
-        // 验证必要参数
+        // 基本参数验证
         if (request.getAudioUrl() == null || request.getAudioUrl().isEmpty()) {
+            log.warn("音频对话请求缺少必要的audioUrl参数");
             return QwenResponse.builder()
                     .success(false)
                     .statusCode(400)
@@ -139,10 +142,31 @@ public class QwenController {
                     .build();
         }
         
-        log.info("接收到音频对话请求：audioUrl={}, textContent={}", 
-                 request.getAudioUrl(), 
-                 request.getTextContent());
+        log.info("接收到音频对话请求：audioUrl={}, textContent={}",
+                request.getAudioUrl(),
+                request.getTextContent());
         
-        return qwenService.multiModalChat(request);
+        // 设置默认模型（如果未指定）
+        if (request.getModel() == null || request.getModel().isEmpty()) {
+            request.setModel("qwen2-audio-instruct");
+            log.info("未指定模型，使用默认音频模型: qwen2-audio-instruct");
+        }
+        
+        // 设置默认的系统提示词（如果未指定）
+        if (request.getSystemPrompt() == null || request.getSystemPrompt().isEmpty()) {
+            request.setSystemPrompt("You are a helpful assistant specialized in audio analysis.");
+        }
+        
+        // 调用服务
+        QwenResponse response = qwenService.multiModalChat(request);
+        
+        // 简化日志
+        if (response.getSuccess() != null && response.getSuccess()) {
+            log.info("音频分析成功，请求ID: {}", response.getRequestId());
+        } else {
+            log.error("音频分析失败: {}", response.getMessage());
+        }
+        
+        return response;
     }
 }

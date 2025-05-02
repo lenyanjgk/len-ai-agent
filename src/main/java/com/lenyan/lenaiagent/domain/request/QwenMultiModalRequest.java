@@ -26,15 +26,15 @@ public class QwenMultiModalRequest {
     @Schema(description = "文本内容", example = "这张图片是什么?")
     private String textContent;
 
-    @Schema(description = "图像URL列表", example = "['https://example.com/image.jpg']")
+    @Schema(description = "图像URL列表", example = "https://aigc-files.bigmodel.cn/api/cogview/20250324000053fc8b6f0918ed40c3_0.png")
     @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
 
-    @Schema(description = "视频URL或图像帧列表", example = "['https://example.com/frame1.jpg', 'https://example.com/frame2.jpg']")
+    @Schema(description = "视频URL或图像帧列表", example = "")
     @Builder.Default
     private List<String> videoUrls = new ArrayList<>();
 
-    @Schema(description = "音频URL", example = "https://example.com/audio.mp3")
+    @Schema(description = "音频URL", example = "https://dashscope.oss-cn-beijing.aliyuncs.com/audios/welcome.mp3")
     private String audioUrl;
 
     @Schema(description = "系统提示词", example = "You are a helpful assistant.")
