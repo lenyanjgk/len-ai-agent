@@ -65,11 +65,27 @@ class LoveAppTest {
         Assertions.assertTrue(exception.getMessage().contains("违禁词"));
 
         // 测试其他违禁词
-        // 需确保prohibited-words.txt文件中包含"色情"这个词
         String prohibitedMessage2 = "我想了解一些色情内容";
         exception = Assertions.assertThrows(
                 ProhibitedWordAdvisor.ProhibitedWordException.class,
                 () -> loveApp.doChat(prohibitedMessage2, chatId));
         Assertions.assertTrue(exception.getMessage().contains("违禁词"));
     }
+
+    @Test
+    void doChatWithRag() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "我已经结婚了，但是婚后关系不太亲密，怎么办？";
+        String answer =  loveApp.doChatWithRagcloud(message, chatId);
+        Assertions.assertNotNull(answer);
+    }
+
+    @Test
+    void doChatWithRagcloud() {
+        String chatId = UUID.randomUUID().toString();
+        String message = "我是牛马座20岁，男大学生在广州，我想找对象~，帮我找找有没有适合我的";
+        String answer =  loveApp.doChatWithRagcloud(message, chatId);
+        Assertions.assertNotNull(answer);
+    }
+
 }
