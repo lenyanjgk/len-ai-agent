@@ -8,11 +8,11 @@ import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.SystemMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,10 +29,10 @@ public class MySQLChatMemory implements ChatMemory {
     private final JdbcTemplate jdbcTemplate;
     private final JSONConfig jsonConfig;
 
-    public MySQLChatMemory(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    public MySQLChatMemory(@Qualifier("mysqlJdbcTemplate") JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
         this.jsonConfig = new JSONConfig().setIgnoreNullValue(true);
-        log.info("初始化MySQL对话记忆");
+        log.info("初始化MySQL对话记忆，使用限定的MySQL数据源");
     }
 
     @Override

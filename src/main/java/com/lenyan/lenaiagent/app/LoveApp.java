@@ -2,12 +2,17 @@ package com.lenyan.lenaiagent.app;
 
 import com.lenyan.lenaiagent.advisor.MyLoggerAdvisor;
 import com.lenyan.lenaiagent.advisor.ProhibitedWordAdvisor;
+import com.lenyan.lenaiagent.chatmemory.MySQLChatMemory;
 import com.lenyan.lenaiagent.chatmemory.MybatisPlusChatMemory;
+import com.lenyan.lenaiagent.rag.LoveAppRagCustomAdvisorFactory;
+import com.lenyan.lenaiagent.rag.QueryRewriter;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.InMemoryChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.vectorstore.VectorStore;
@@ -27,7 +32,7 @@ public class LoveApp {
     private static final String SYSTEM_PROMPT = "**恋爱大师·情感导航员**  \n" + "10年情感咨询经验，擅长亲密关系理论与沟通技巧。提供中立建议，保护隐私。通过情绪确认、需求拆解（3-5维度）、心理学理论（如非暴力沟通）解析问题，给出2种实操策略（如\"我句式\"对话模拟），引导关系边界建立。示例：\"遗忘纪念日可能涉及记忆模式/爱意表达方式差异，建议用'观察+感受'沟通\"。不评判道德、不做医疗建议，严守伦理规范。您的专属情感顾问，随时为您解惑。";
     private final ChatClient chatClient;
 
-    public LoveApp(ChatModel dashscopeChatModel, MybatisPlusChatMemory chatMemory /*MySQLChatMemory chatMemory*/) {
+    public LoveApp(ChatModel dashscopeChatModel, MybatisPlusChatMemory mybatisPluschatMemory ,MySQLChatMemory jdbcmysqlchatMemory) {
 //         String fileDir = System.getProperty("user.dir") + "/tmp/chat-memory";
 //         ChatMemory chatMemory = new FileBasedChatMemory(fileDir);
 
@@ -35,11 +40,11 @@ public class LoveApp {
 //        ChatMemory chatMemory = new MySQLChatMemory(dataSource);
         chatClient = ChatClient.builder(dashscopeChatModel)
                 .defaultSystem(SYSTEM_PROMPT)
-                .defaultAdvisors(new MessageChatMemoryAdvisor(chatMemory),
+                .defaultAdvisors(new MessageChatMemoryAdvisor(mybatisPluschatMemory),
                         // 记录日志
-                        new MyLoggerAdvisor(),
+                        new MyLoggerAdvisor()
                         // 违禁词检测 - 从文件读取违禁词
-                        new ProhibitedWordAdvisor()
+//                        new ProhibitedWordAdvisor()
                         // 复读强化阅读能力
                         //new ReReadingAdvisor()
                 ).build();
@@ -86,33 +91,33 @@ public class LoveApp {
     @Resource
     private Advisor loveAppRagCloudAdvisor;
 
+    @Resource
+    private VectorStore pgVectorVectorStore;
+
+    @Resource
+    private QueryRewriter queryRewriter;
+
     public String doChatWithRag(String message, String chatId) {
+        String rewrittenMessage = queryRewriter.doQueryRewrite(message);
         ChatResponse chatResponse = chatClient
                 .prompt()
-                .user(message)
+                .user(rewrittenMessage)
                 .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
                         .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
                 // 开启日志，便于观察效果
                 .advisors(new MyLoggerAdvisor())
                 // 应用知识库问答
                 .advisors(new QuestionAnswerAdvisor(loveAppVectorStore))
-                .call()
-                .chatResponse();
-        String content = chatResponse.getResult().getOutput().getText();
-        log.info("content: {}", content);
-        return content;
-    }
-
-    public String doChatWithRagcloud(String message, String chatId) {
-        ChatResponse chatResponse = chatClient
-                .prompt()
-                .user(message)
-                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
-                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
-                // 开启日志，便于观察效果
-                .advisors(new MyLoggerAdvisor())
                 // 应用增强检索服务（云知识库服务）
-                .advisors(loveAppRagCloudAdvisor)
+//                .advisors(loveAppRagCloudAdvisor)
+                // rag应用 （基于 PgVector 向量存储）
+//                .advisors(new QuestionAnswerAdvisor(pgVectorVectorStore))
+                // 应用自定义的 RAG 检索增强服务（文档查询器 + 上下文增强器）
+//                .advisors(
+//                        LoveAppRagCustomAdvisorFactory.createLoveAppRagCustomAdvisor(
+//                                loveAppVectorStore, "单身"
+//                        )
+//                )
                 .call()
                 .chatResponse();
         String content = chatResponse.getResult().getOutput().getText();

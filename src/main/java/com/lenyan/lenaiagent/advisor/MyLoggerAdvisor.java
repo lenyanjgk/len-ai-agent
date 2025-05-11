@@ -29,7 +29,7 @@ public class MyLoggerAdvisor implements CallAroundAdvisor, StreamAroundAdvisor {
 
     // 响应后打印 AI 输出
     private void observeAfter(AdvisedResponse response) {
-        log.info("AI Response: {}", response.response().getResult().getOutput().getText());
+        //log.info("AI Response: {}", response.response().getResult().getOutput().getText());
     }
 
     // 同步调用处理

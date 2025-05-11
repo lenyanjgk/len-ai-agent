@@ -14,7 +14,7 @@ import java.util.List;
 
 @Component
 @Slf4j
-class LoveAppDocumentLoader {
+public class LoveAppDocumentLoader {
 
     private final ResourcePatternResolver resourcePatternResolver;
 
@@ -22,20 +22,27 @@ class LoveAppDocumentLoader {
         this.resourcePatternResolver = resourcePatternResolver;
     }
 
+    /**
+     * 加载多篇 Markdown 文档
+     * @return
+     */
     public List<Document> loadMarkdowns() {
         List<Document> allDocuments = new ArrayList<>();
         try {
             Resource[] resources = resourcePatternResolver.getResources("classpath:document/*.md");
             for (Resource resource : resources) {
-                String fileName = resource.getFilename();
+                String filename = resource.getFilename();
+                // 提取文档倒数第 3 和第 2 个字作为标签
+                String status = filename.substring(filename.length() - 6, filename.length() - 4);
                 MarkdownDocumentReaderConfig config = MarkdownDocumentReaderConfig.builder()
                         .withHorizontalRuleCreateDocument(true)
                         .withIncludeCodeBlock(false)
                         .withIncludeBlockquote(false)
-                        .withAdditionalMetadata("filename", fileName)
+                        .withAdditionalMetadata("filename", filename)
+                        .withAdditionalMetadata("status", status)
                         .build();
-                MarkdownDocumentReader reader = new MarkdownDocumentReader(resource, config);
-                allDocuments.addAll(reader.get());
+                MarkdownDocumentReader markdownDocumentReader = new MarkdownDocumentReader(resource, config);
+                allDocuments.addAll(markdownDocumentReader.get());
             }
         } catch (IOException e) {
             log.error("Markdown 文档加载失败", e);

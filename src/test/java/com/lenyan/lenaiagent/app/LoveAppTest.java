@@ -76,7 +76,7 @@ class LoveAppTest {
     void doChatWithRag() {
         String chatId = UUID.randomUUID().toString();
         String message = "我已经结婚了，但是婚后关系不太亲密，怎么办？";
-        String answer =  loveApp.doChatWithRagcloud(message, chatId);
+        String answer =  loveApp.doChatWithRag(message, chatId);
         Assertions.assertNotNull(answer);
     }
 
@@ -84,7 +84,7 @@ class LoveAppTest {
     void doChatWithRagcloud() {
         String chatId = UUID.randomUUID().toString();
         String message = "我是牛马座20岁，男大学生在广州，我想找对象~，帮我找找有没有适合我的";
-        String answer =  loveApp.doChatWithRagcloud(message, chatId);
+        String answer =  loveApp.doChatWithRag(message, chatId);
         Assertions.assertNotNull(answer);
     }
 
