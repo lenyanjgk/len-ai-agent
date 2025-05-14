@@ -149,6 +149,11 @@
 <!--            <artifactId>spring-ai-starter-vector-store-pgvector</artifactId>-->
 <!--            <version>1.0.0-M7</version>-->
 <!--        </dependency>-->
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>github-api</artifactId>
+            <version>1.321</version>
+        </dependency>
 
 
     </dependencies>

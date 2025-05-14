@@ -23,6 +23,7 @@ public class PgVectorVectorStoreConfig {
     private LoveAppDocumentLoader loveAppDocumentLoader;
 
 //    @Bean
+    // todo 按需使用加载
     public VectorStore pgVectorVectorStore(@Qualifier("postgresJdbcTemplate") JdbcTemplate jdbcTemplate, EmbeddingModel dashscopeEmbeddingModel) {
         // 创建PgVectorStore实例，配置向量存储的参数
         VectorStore vectorStore = PgVectorStore.builder(jdbcTemplate, dashscopeEmbeddingModel)
