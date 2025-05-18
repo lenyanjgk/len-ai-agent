@@ -27,4 +27,5 @@ knife4j:
     language: zh_cn
 logging:
   level:
-    org.springframework.ai.chat.advisor.SimpleChatAdvisor: DEBUG
+#    org.springframework.ai.chat.advisor.SimpleChatAdvisor: DEBUG
+    org.springframework.ai: DEBUG
