@@ -8,7 +8,7 @@ class TerminalOperationToolTest {
     @Test
     void executeTerminalCommand() {
         TerminalOperationTool terminalOperationTool = new TerminalOperationTool();
-        String command = "dir";
+        String command = "calc";//打开计算器
         String result = terminalOperationTool.executeTerminalCommand(command);
         Assertions.assertNotNull(result);
     }

@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.Async;
 class WebScrapingToolTest {
 
     @Test
-//    @Async
     void scrapeWebPage() {
         WebScrapingTool webScrapingTool = new WebScrapingTool();
         String url = "https://blog.csdn.net/jgk666666";
