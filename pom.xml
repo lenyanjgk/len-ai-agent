@@ -165,12 +165,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>jakarta.mail</artifactId>
-            <version>1.6.7</version>
-        </dependency>
-
         <!-- Spring Boot Mail Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

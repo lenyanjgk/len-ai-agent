@@ -1,10 +1,12 @@
 package com.lenyan.lenaiagent.tools;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -23,24 +25,34 @@ public class DatabaseOperationTool {
     
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
-     * 查询数据
+     * 查询数据（不带参数）
      */
-    @Tool(description = "Query data from database")
+    @Tool(description = "Query data from database with SQL only")
+    public String queryData(@ToolParam(description = "SQL query statement") String sql) {
+        try {
+            List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
+            return formatResultList(result);
+        } catch (Exception e) {
+            return "Error executing query: " + e.getMessage();
+        }
+    }
+
+    /**
+     * 查询数据（带参数）
+     */
+    @Tool(description = "Query data from database with parameters")
     public String queryData(
             @ToolParam(description = "SQL query statement") String sql,
             @ToolParam(description = "Query parameters in JSON format, e.g. {\"id\":1, \"name\":\"test\"}") String params
     ) {
         try {
-            if (params == null || params.isEmpty()) {
-                List<Map<String, Object>> result = jdbcTemplate.queryForList(sql);
-                return formatResultList(result);
-            } else {
-                Map<String, Object> paramMap = parseParams(params);
-                List<Map<String, Object>> result = namedParameterJdbcTemplate.queryForList(sql, paramMap);
-                return formatResultList(result);
-            }
+            Map<String, Object> paramMap = parseParams(params);
+            List<Map<String, Object>> result = namedParameterJdbcTemplate.queryForList(sql, paramMap);
+            return formatResultList(result);
         } catch (Exception e) {
             return "Error executing query: " + e.getMessage();
         }
@@ -101,29 +113,16 @@ public class DatabaseOperationTool {
      * 解析JSON参数
      */
     private Map<String, Object> parseParams(String paramsJson) {
-        // 这里可以使用JSON库解析参数
-        // 简化实现，假设参数格式为 {"key1":"value1", "key2":"value2"}
-        Map<String, Object> paramMap = new HashMap<>();
-        try {
-            if (paramsJson != null && !paramsJson.isEmpty()) {
-                // 移除花括号和引号
-                String cleanParams = paramsJson.replaceAll("[{}\"]", "");
-                String[] pairs = cleanParams.split(",");
-                
-                for (String pair : pairs) {
-                    String[] keyValue = pair.split(":");
-                    if (keyValue.length == 2) {
-                        String key = keyValue[0].trim();
-                        String value = keyValue[1].trim();
-                        paramMap.put(key, value);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            // 解析错误，返回空Map
+        if (paramsJson == null || paramsJson.isEmpty()) {
             return new HashMap<>();
         }
-        return paramMap;
+        
+        try {
+            return objectMapper.readValue(paramsJson, new TypeReference<Map<String, Object>>() {});
+        } catch (JsonProcessingException e) {
+            System.err.println("Error parsing JSON params: " + e.getMessage());
+            return new HashMap<>();
+        }
     }
 
     /**
@@ -141,7 +140,7 @@ public class DatabaseOperationTool {
         
         // 创建分隔线
         StringBuilder separator = new StringBuilder();
-        for (int i = 0; i < sb.length() - 1; i++) { // 减1是去掉换行符
+        for (int i = 0; i < sb.length() - 1; i++) {
             separator.append("-");
         }
         sb.append(separator).append("\n");

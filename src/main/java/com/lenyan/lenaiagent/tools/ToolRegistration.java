@@ -17,13 +17,7 @@ public class ToolRegistration {
     private String searchApiKey;
     
     @Autowired
-    private EmailSendingTool emailSendingTool;
-    
-    @Autowired
     private DateTimeTool dateTimeTool;
-    
-    @Autowired
-    private DatabaseOperationTool databaseOperationTool;
 
     /**
      * 注册所有AI工具
@@ -38,9 +32,7 @@ public class ToolRegistration {
                 new ResourceDownloadTool(),
                 new TerminalOperationTool(),
                 new PDFGenerationTool(),
-                emailSendingTool,
-                dateTimeTool,
-                databaseOperationTool
+                new DateTimeTool()
         );
     }
 }

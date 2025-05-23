@@ -106,12 +106,26 @@ class LoveAppTest {
         testMessage("保存我的恋爱档案为文件");
 
         // 测试 PDF 生成
-        testMessage("生成一份‘七夕约会计划’PDF，包含餐厅预订、活动流程和礼物清单");
+        testMessage("生成一份'七夕约会计划'PDF，包含餐厅预订、活动流程和礼物清单");
+
+        //注：以下可能调用失败
+        // 测试数据库操作工具
+        testMessage("查询我和女友最近一周的聊天记录，她的会话ID是abc-123");
+        testMessage("帮我记录今天的约会内容到数据库，内容是'和女友去了迪士尼，玩得很开心'");
+        
+        // 测试邮件发送工具
+        testMessage("给我女朋友发送一封表达爱意的邮件，她的邮箱是xxx@qq.com");
+        testMessage("明天是我女友的生日，帮我发送一封HTML格式的精美生日祝福邮件给她");
+        
+        // 测试日期时间工具
+        testMessage("今天是什么日期？请用yyyy-MM-dd格式告诉我");
+        testMessage("我们是2023年5月20日认识的，请计算我们在一起100天和1周年纪念日分别是哪天");
     }
 
     private void testMessage(String message) {
         String chatId = UUID.randomUUID().toString();
         String answer = loveApp.doChatWithTools(message, chatId);
+        System.out.println(message + "\n\n"+answer);
         Assertions.assertNotNull(answer);
     }
 
