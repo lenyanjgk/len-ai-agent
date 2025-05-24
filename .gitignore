@@ -2,6 +2,7 @@
 application-local.yml
 /src/main/java/com/lenyan/lenaiagent/demo/invoke/TestApiKey.java
 /tmp/*
+/src/main/resources/mcp-serversbf.json
 
 HELP.md
 target/
