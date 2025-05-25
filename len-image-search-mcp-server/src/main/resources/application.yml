@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: len-image-search-mcp-server
+  profiles:
+    active: sse
+server:
+  port: 8127

@@ -1,0 +1,8 @@
+spring:
+  ai:
+    mcp:
+      server:
+        name: len-image-search-mcp-server
+        version: 1.0.0
+        type: SYNC
+        stdio: false
