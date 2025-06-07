@@ -32,7 +32,8 @@ public class ToolRegistration {
                 new ResourceDownloadTool(),
                 new TerminalOperationTool(),
                 new PDFGenerationTool(),
-                new DateTimeTool()
+                new DateTimeTool(),
+                new TerminateTool()
         );
     }
 }
