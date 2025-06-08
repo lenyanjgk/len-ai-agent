@@ -15,9 +15,6 @@ public class ToolRegistration {
 
     @Value("${search-api.api-key}")
     private String searchApiKey;
-    
-    @Autowired
-    private DateTimeTool dateTimeTool;
 
     /**
      * 注册所有AI工具
@@ -32,6 +29,7 @@ public class ToolRegistration {
                 new ResourceDownloadTool(),
                 new TerminalOperationTool(),
                 new PDFGenerationTool(),
+//                new ImageSearchTool(),
                 new DateTimeTool(),
                 new TerminateTool()
         );

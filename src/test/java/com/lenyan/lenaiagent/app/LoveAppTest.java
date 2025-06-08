@@ -90,6 +90,8 @@ class LoveAppTest {
 
     @Test
     void doChatWithTools() {
+        testMessage("帮我搜索一下 computer 相关图片");
+
         // 测试联网搜索问题的答案
         testMessage("周末想带女朋友去上海约会，搜索一下推荐几个适合情侣的小众打卡地？");
 
