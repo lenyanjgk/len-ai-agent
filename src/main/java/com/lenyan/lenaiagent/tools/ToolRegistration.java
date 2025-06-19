@@ -29,6 +29,7 @@ public class ToolRegistration {
                 new ResourceDownloadTool(),
                 new TerminalOperationTool(),
                 new PDFGenerationTool(),
+                new HtmlGenerationTool(),
 //                new ImageSearchTool(),
                 new DateTimeTool(),
                 new TerminateTool()
