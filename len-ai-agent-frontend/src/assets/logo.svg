@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+  <circle cx="75" cy="75" r="70" fill="#165DFF" opacity="0.1" />
+  <circle cx="75" cy="75" r="50" fill="#165DFF" opacity="0.2" />
+  <circle cx="75" cy="75" r="35" fill="#165DFF" />
+  <text x="75" y="85" font-family="Arial" font-size="28" fill="white" text-anchor="middle" font-weight="bold">AI</text>
+  <path d="M45,45 C55,35 65,30 75,30 C85,30 95,35 105,45" stroke="white" stroke-width="3" fill="none" />
+  <path d="M45,105 C55,115 65,120 75,120 C85,120 95,115 105,105" stroke="white" stroke-width="3" fill="none" />
+</svg> 
