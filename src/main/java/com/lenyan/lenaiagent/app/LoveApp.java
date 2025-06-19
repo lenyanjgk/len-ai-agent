@@ -21,6 +21,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.chat.client.advisor.api.Advisor;
 
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -44,9 +45,9 @@ public class LoveApp {
                 .defaultSystem(SYSTEM_PROMPT)
                 .defaultAdvisors(new MessageChatMemoryAdvisor(mybatisPluschatMemory),
                         // 记录日志
-                        new MyLoggerAdvisor()
+                        new MyLoggerAdvisor(),
                         // 违禁词检测 - 从文件读取违禁词
-//                        new ProhibitedWordAdvisor()
+                        new ProhibitedWordAdvisor()
                         // 复读强化阅读能力
                         //new ReReadingAdvisor()
                 ).build();
@@ -82,6 +83,23 @@ public class LoveApp {
                 .call().entity(LoveReport.class);
         log.info("loveReport: {}", loveReport);
         return loveReport;
+    }
+
+    /**
+     * AI 基础对话（支持多轮对话记忆，SSE 流式传输）
+     *
+     * @param message
+     * @param chatId
+     * @return
+     */
+    public Flux<String> doChatByStream(String message, String chatId) {
+        return chatClient
+                .prompt()
+                .user(message)
+                .advisors(spec -> spec.param(CHAT_MEMORY_CONVERSATION_ID_KEY, chatId)
+                        .param(CHAT_MEMORY_RETRIEVE_SIZE_KEY, 10))
+                .stream()
+                .content();
     }
 
     record LoveReport(String title, List<String> suggestions) {

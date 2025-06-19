@@ -167,6 +167,9 @@ public abstract class BaseAgent {
      * 清理资源
      */
     protected void cleanup() {
+        // 重置WebSearchTool的搜索次数计数器
+        com.lenyan.lenaiagent.tools.WebSearchTool.resetSearchCallCount();
+        log.debug("清理资源：已重置WebSearchTool的搜索次数计数器");
         // 子类可重写
     }
     
